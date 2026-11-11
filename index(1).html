@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatar geometrico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Quaderno a quadretti: carta chiara, inchiostro blu notte, pennarelli vivaci */
+  --paper:#f7f9fd;
+  --grid:#e2e9f6;
+  --ink:#1f2a44;
+  --muted:#5b6785;
+  --card:#ffffff;
+  --line:#cdd7ea;
+  --accent:#ff5a36;
+  --blue:#2f6fed;
+  --sun:#ffc531;
+  --ok:#1f9d5c;
+  --display:"Fredoka","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.45;
+}
+header{
+  max-width:1180px;margin:0 auto;padding:20px 16px 8px;
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px;
+}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,40px);margin:0;line-height:1.1;text-wrap:balance}
+h1 .dot{color:var(--accent)}
+.sub{margin:4px 0 0;color:var(--muted);font-weight:700}
+.tag{font-family:var(--display);font-weight:600;font-size:14px;background:var(--ink);color:#fff;padding:6px 12px;border-radius:999px}
+main{
+  max-width:1180px;margin:0 auto;padding:12px 16px 32px;
+  display:grid;grid-template-columns:minmax(300px,440px) 1fr;gap:20px;align-items:start;
+}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:18px;padding:16px;box-shadow:4px 4px 0 var(--ink)}
+.stage{display:grid;gap:12px}
+#avatar{width:100%;height:auto;display:block;border-radius:12px;border:2px solid var(--line);background:#fff}
+label.field{display:grid;gap:4px;font-weight:800}
+input[type=text]{
+  font:inherit;font-weight:700;font-size:18px;padding:10px 12px;border:2px solid var(--ink);border-radius:12px;width:100%;color:var(--ink);background:#fff
+}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+.btn{
+  font-family:var(--display);font-weight:600;font-size:17px;
+  padding:10px 12px;border-radius:12px;border:2px solid var(--ink);background:#fff;
+  box-shadow:2px 2px 0 var(--ink);transition:transform .08s
+}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.wide{grid-column:1 / -1}
+.btn.sun{background:var(--sun)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{min-height:1.4em;margin:0;font-weight:700;color:var(--muted);font-size:14px}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{
+  font-family:var(--display);font-weight:600;font-size:16px;padding:7px 14px;border-radius:999px;
+  border:2px solid var(--ink);background:#fff
+}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.panel h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0 0 10px}
+.group{margin:0 0 14px}
+.group-title{font-weight:800;margin:0 0 6px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.shapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
+.shape-btn{
+  display:grid;justify-items:center;gap:2px;padding:6px 4px 8px;border-radius:12px;
+  border:2px solid var(--line);background:#fff;font-weight:800;font-size:13px
+}
+.shape-btn svg{width:56px;height:56px}
+.shape-btn[aria-pressed="true"]{border-color:var(--ink);background:#fff6d6;box-shadow:2px 2px 0 var(--ink)}
+.shape-btn .info{font-weight:700;color:var(--muted);font-size:11px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);padding:0}
+.sw[aria-pressed="true"]{border:3px solid var(--ink);box-shadow:0 0 0 3px #fff inset}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.slider{display:grid;gap:2px;font-weight:800}
+.slider span{font-variant-numeric:tabular-nums;color:var(--blue)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;font-weight:800}
+.check input{width:22px;height:22px;accent-color:var(--accent)}
+
+.count{margin-top:20px}
+.count h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0 0 4px}
+.count p.hint{margin:0 0 10px;color:var(--muted);font-weight:700}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.n,th.n{text-align:right}
+tfoot td{font-weight:800;border-top:2px solid var(--ink);border-bottom:none;font-size:18px}
+.challenge{
+  margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+  padding:12px;border-radius:14px;border:2px dashed var(--ink);background:#fffaf0
+}
+.challenge strong{font-family:var(--display);font-size:19px;font-weight:600}
+.badge{font-weight:800;padding:4px 10px;border-radius:999px;background:var(--grid)}
+.badge.win{background:var(--ok);color:#fff}
+
+.modal{position:fixed;inset:0;background:rgba(31,42,68,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.open{display:flex}
+.modal .card{max-width:520px;width:100%;display:grid;gap:10px}
+.modal img{max-width:100%;max-height:60vh;justify-self:center;display:block;background:transparent;border:0}
+.modal h3{margin:0;font-family:var(--display);font-weight:600;font-size:22px}
+.modal p{margin:0}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Avatar geometrico<span class="dot">.</span></h1>
+    <p class="sub">Costruisci il tuo avatar usando solo figure geometriche.</p>
+  </div>
+  <span class="tag">PN Programmare la geometria</span>
+</header>
+
+<main>
+  <section class="card stage" aria-label="Il tuo avatar">
+    <div id="stage"></div>
+    <label class="field" for="nome">Il mio nome di fantasia
+      <input type="text" id="nome" maxlength="20" placeholder="Scrivi un nome di fantasia" autocomplete="off">
+    </label>
+    <div class="btns">
+      <button class="btn sun" id="caso" type="button">A caso</button>
+      <button class="btn" id="reset" type="button">Ricomincia</button>
+      <button class="btn blue wide" id="copia" type="button">Copia</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+  </section>
+
+  <div>
+    <section class="card">
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="panel" id="panel" role="tabpanel"></div>
+    </section>
+
+    <section class="card count" aria-labelledby="count-title">
+      <h2 id="count-title">Contiamo la geometria</h2>
+      <p class="hint">Quante figure, quanti lati e quanti vertici ha il tuo avatar?</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Parte</th><th>Figure usate</th><th class="n">Lati</th><th class="n">Vertici</th></tr></thead>
+          <tbody id="rows"></tbody>
+          <tfoot><tr><td>Totale</td><td id="totFig"></td><td class="n" id="totLati"></td><td class="n" id="totVert"></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="challenge">
+        <strong id="sfidaTesto"></strong>
+        <span class="badge" id="sfidaStato"></span>
+        <button class="btn" id="nuovaSfida" type="button">Nuova sfida</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="card">
+    <h3 id="modal-title">Il tuo avatar è pronto</h3>
+    <p id="modal-text">Fai clic destro sull'immagine (o tieni premuto sul tablet) e scegli <b>Copia immagine</b>. Poi incollala dove vuoi.</p>
+    <img id="modal-img" alt="Immagine del tuo avatar">
+    <button class="btn" id="chiudi" type="button">Chiudi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var INK = "#1f2a44";
+var CX = 200, CY = 205, R0 = 100;
+
+/* ---------- Figure: nome, plurale, lati, vertici ---------- */
+var META = {
+  cerchio:["cerchio","cerchi",0,0],
+  ovale:["ovale","ovali",0,0],
+  quadrato:["quadrato","quadrati",4,4],
+  rettangolo:["rettangolo","rettangoli",4,4],
+  triangolo:["triangolo","triangoli",3,3],
+  triangoloGiu:["triangolo","triangoli",3,3],
+  pentagono:["pentagono","pentagoni",5,5],
+  esagono:["esagono","esagoni",6,6],
+  ottagono:["ottagono","ottagoni",8,8],
+  rombo:["rombo","rombi",4,4],
+  stella:["stella","stelle",10,10],
+  semicerchio:["semicerchio","semicerchi",1,2],
+  trapezio:["trapezio","trapezi",4,4]
+};
+var LABEL = {
+  cerchio:"Cerchio", ovale:"Ovale", quadrato:"Quadrato", rettangolo:"Rettangolo",
+  triangolo:"Triangolo", triangoloGiu:"Triangolo giù", pentagono:"Pentagono",
+  esagono:"Esagono", ottagono:"Ottagono", rombo:"Rombo", stella:"Stella",
+  semicerchio:"Semicerchio", trapezio:"Trapezio",
+  nessuno:"Nessuno", punte:"Punte", calotta:"Calotta", caschetto:"Caschetto",
+  ricci:"Ricci", codini:"Codini", babbo:"Babbo Natale", corona:"Corona",
+  cilindro:"Cilindro", tondi:"Occhiali tondi", quadri:"Occhiali quadrati",
+  guance:"Guance", papillon:"Papillon"
+};
+
+function f(n){ return Math.round(n*10)/10; }
+function reg(n, r, startDeg){
+  var p = [];
+  for (var i=0;i<n;i++){
+    var a = (startDeg + i*360/n) * Math.PI/180;
+    p.push(f(r*Math.cos(a))+","+f(r*Math.sin(a)));
+  }
+  return p.join(" ");
+}
+function starPts(n, ro, ri){
+  var p = [];
+  for (var i=0;i<n*2;i++){
+    var r = i%2===0 ? ro : ri;
+    var a = (-90 + i*180/n) * Math.PI/180;
+    p.push(f(r*Math.cos(a))+","+f(r*Math.sin(a)));
+  }
+  return p.join(" ");
+}
+function el(type, w, h, attrs){
+  switch(type){
+    case "cerchio": return '<circle r="'+f(w)+'" '+attrs+'/>';
+    case "ovale": return '<ellipse rx="'+f(w*0.8)+'" ry="'+f(h*1.08)+'" '+attrs+'/>';
+    case "quadrato": return '<rect x="'+f(-w)+'" y="'+f(-w)+'" width="'+f(2*w)+'" height="'+f(2*w)+'" '+attrs+'/>';
+    case "rettangolo": return '<rect x="'+f(-w*0.8)+'" y="'+f(-h*1.05)+'" width="'+f(1.6*w)+'" height="'+f(2.1*h)+'" '+attrs+'/>';
+    case "triangolo": return '<polygon points="'+reg(3,w*1.15,-90)+'" '+attrs+'/>';
+    case "triangoloGiu": return '<polygon points="'+reg(3,w*1.15,90)+'" '+attrs+'/>';
+    case "pentagono": return '<polygon points="'+reg(5,w*1.05,-90)+'" '+attrs+'/>';
+    case "esagono": return '<polygon points="'+reg(6,w*1.05,0)+'" '+attrs+'/>';
+    case "ottagono": return '<polygon points="'+reg(8,w*1.05,22.5)+'" '+attrs+'/>';
+    case "rombo": return '<polygon points="0,'+f(-h*1.1)+' '+f(w*0.85)+',0 0,'+f(h*1.1)+' '+f(-w*0.85)+',0" '+attrs+'/>';
+    case "stella": return '<polygon points="'+starPts(5,w*1.1,w*0.48)+'" '+attrs+'/>';
+    case "semicerchio": return '<path d="M'+f(-w)+','+f(-w/2)+' A'+f(w)+','+f(w)+' 0 0 0 '+f(w)+','+f(-w/2)+' Z" '+attrs+'/>';
+    case "semicerchioSu": return '<path d="M'+f(-w)+','+f(w/2)+' A'+f(w)+','+f(w)+' 0 0 1 '+f(w)+','+f(w/2)+' Z" '+attrs+'/>';
+    case "trapezio": return '<polygon points="'+f(-w*0.55)+','+f(-h*0.6)+' '+f(w*0.55)+','+f(-h*0.6)+' '+f(w)+','+f(h*0.6)+' '+f(-w)+','+f(h*0.6)+'" '+attrs+'/>';
+  }
+  return "";
+}
+function paint(fill, sw){ return 'fill="'+fill+'" stroke="'+INK+'" stroke-width="'+(sw||3)+'" stroke-linejoin="round"'; }
+function shape(type, cx, cy, w, h, fill, rot, sw){
+  return '<g transform="translate('+f(cx)+' '+f(cy)+') rotate('+(rot||0)+')">'+el(type,w,h,paint(fill,sw))+'</g>';
+}
+function poly(pts, fill){ return '<polygon points="'+pts.map(function(p){return f(p[0])+","+f(p[1]);}).join(" ")+'" '+paint(fill)+'/>'; }
+function rect(x,y,w,h,fill){ return '<rect x="'+f(x)+'" y="'+f(y)+'" width="'+f(w)+'" height="'+f(h)+'" '+paint(fill)+'/>'; }
+
+/* ---------- Dimensioni del viso: [mezza larghezza, alto, basso] in unità di R ---------- */
+var FACE = {
+  cerchio:[1,1,1], ovale:[0.8,1.08,1.08], quadrato:[1,1,1], rettangolo:[0.8,1.05,1.05],
+  pentagono:[1,1.05,0.85], esagono:[1,0.91,0.91], ottagono:[0.97,0.97,0.97],
+  rombo:[0.85,1.1,1.1], triangoloGiu:[0.8,0.575,1.15]
+};
+function faceCtx(v){
+  var F = R0 * v.scala, d = FACE[v.forma] || FACE.cerchio;
+  return {R:R0, F:F, w:d[0]*F, top:d[1]*F, bot:d[2]*F, cx:CX, cy:CY};
+}
+
+/* ---------- Parti ---------- */
+var SKIN = ["#f4c7a1","#e0a878","#b9774f","#8a5433","#ffe0c7","#7cc6fe","#9be08a","#ffd166","#c3a6ff","#ff9db5"];
+var PARTS = [
+  {id:"viso", nome:"Viso", forme:["cerchio","ovale","quadrato","rettangolo","pentagono","esagono","ottagono","rombo","triangoloGiu"],
+   colori:SKIN, ctrl:["scala","rot"], scala:[0.75,1.3]},
+  {id:"orecchie", nome:"Orecchie", forme:["nessuno","cerchio","ovale","triangolo","quadrato","rombo","pentagono"],
+   colori:null, ctrl:["scala","rot"], nota:"Le orecchie hanno lo stesso colore del viso."},
+  {id:"capelli", nome:"Capelli", forme:["nessuno","punte","calotta","caschetto","ricci","codini"],
+   colori:["#2b2118","#6b3f22","#c9772f","#f2d16b","#e2483d","#3f7be0","#8d5bd8","#2bb673","#ffffff"], ctrl:["scala"]},
+  {id:"occhi", nome:"Occhi", forme:["cerchio","ovale","quadrato","triangolo","rombo","stella","esagono","pentagono"],
+   colori:["#ffffff","#bfe3ff","#c9f2c0","#fff1a8","#ffd0dc",INK], ctrl:["scala","rot","dist","pupille"]},
+  {id:"naso", nome:"Naso", forme:["nessuno","triangolo","triangoloGiu","cerchio","rombo","rettangolo","semicerchio","quadrato"],
+   colori:["#e98f6f","#ff6b6b","#ffb38a","#c47a52","#ffd166","#7cc6fe"], ctrl:["scala","rot"]},
+  {id:"bocca", nome:"Bocca", forme:["semicerchio","rettangolo","ovale","triangoloGiu","trapezio","rombo","cerchio"],
+   colori:["#d93b4a","#ff7a8a","#7a2230","#ffffff",INK,"#ff9f1c"], ctrl:["scala","rot"]},
+  {id:"cappello", nome:"Cappello", forme:["nessuno","babbo","corona","cilindro","stella"],
+   colori:["#e23b3b","#ffc531","#1f2a44","#2f6fed","#2bb673","#8d5bd8"], ctrl:["scala"]},
+  {id:"extra", nome:"Accessori", forme:["nessuno","tondi","quadri","guance","papillon"],
+   colori:[INK,"#e23b3b","#2f6fed","#ff8fb1","#2bb673","#ffc531"], ctrl:[]},
+  {id:"sfondo", nome:"Sfondo", forme:null,
+   colori:["#cfe3ff","#ffe6a8","#d4f5d0","#ffd6e0","#e5dcff","#ffffff","#ffd2b8","#bdeee8"], ctrl:["quadretti"]}
+];
+var PART = {}; PARTS.forEach(function(p){ PART[p.id]=p; });
+
+var DEFAULT = {
+  nome:"",
+  viso:{forma:"cerchio", colore:"#f4c7a1", scala:1, rot:0},
+  orecchie:{forma:"cerchio", scala:1, rot:0},
+  capelli:{forma:"punte", colore:"#6b3f22", scala:1},
+  occhi:{forma:"cerchio", colore:"#ffffff", scala:1, rot:0, dist:1, pupille:true},
+  naso:{forma:"triangolo", colore:"#e98f6f", scala:1, rot:0},
+  bocca:{forma:"semicerchio", colore:"#d93b4a", scala:1, rot:0},
+  cappello:{forma:"nessuno", colore:"#e23b3b", scala:1},
+  extra:{forma:"nessuno", colore:INK},
+  sfondo:{colore:"#cfe3ff", quadretti:true}
+};
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ---------- Disegno delle parti ---------- */
+function use(used, parte, tipo, n){ for (var i=0;i<(n||1);i++) used.push({parte:parte, tipo:tipo}); }
+
+function drawEars(s, c, used){
+  var o = s.orecchie; if (o.forma==="nessuno") return "";
+  var e = c.R*0.24*o.scala, x = c.w + c.R*0.06, y = c.cy - c.R*0.05;
+  use(used,"Orecchie",o.forma,2);
+  return shape(o.forma, c.cx-x, y, e, e, s.viso.colore, -o.rot) + shape(o.forma, c.cx+x, y, e, e, s.viso.colore, o.rot);
+}
+function drawHairBack(s, c, used){
+  var h = s.capelli, col = h.colore, out = "";
+  if (h.forma==="caschetto"){
+    out += rect(c.cx - c.w*1.18, c.cy - c.top - c.R*0.14, c.w*2.36, c.top + c.R*0.14 + c.R*0.75*h.scala, col);
+    use(used,"Capelli","rettangolo");
+  } else if (h.forma==="codini"){
+    var r2 = c.R*0.28*h.scala, x2 = c.w + c.R*0.22;
+    out += shape("cerchio", c.cx - x2, c.cy - c.R*0.5, r2, r2, col, 0) + shape("cerchio", c.cx + x2, c.cy - c.R*0.5, r2, r2, col, 0);
+    use(used,"Capelli","cerchio",2);
+  }
+  return out;
+}
+function drawHairFront(s, c, used){
+  var h = s.capelli, col = h.colore, out = "";
+  if (h.forma==="punte"){
+    var n = 5, x0 = c.cx - c.w, step = 2*c.w/n, base = c.cy - c.top + c.R*0.28, hh = c.R*0.5*h.scala;
+    for (var i=0;i<n;i++){
+      out += poly([[x0+i*step, base],[x0+(i+1)*step, base],[x0+(i+0.5)*step, base-hh]], col);
+    }
+    use(used,"Capelli","triangolo",n);
+  } else if (h.forma==="calotta" || h.forma==="codini"){
+    var w = c.w*1.08*h.scala;
+    out += '<g transform="translate('+f(c.cx)+' '+f(c.cy - c.R*0.4 - w/2)+')">'+el("semicerchioSu", w, w, paint(col))+'</g>';
+    use(used,"Capelli","semicerchio");
+  } else if (h.forma==="ricci"){
+    var rr = Math.max(c.w, c.top)*0.92, r = c.R*0.22*h.scala;
+    for (var i=0;i<9;i++){
+      var a = (-170 + i*20) * Math.PI/180;
+      out += shape("cerchio", c.cx + rr*Math.cos(a), c.cy + rr*Math.sin(a)*(c.top/Math.max(c.w,c.top)), r, r, col, 0);
+    }
+    use(used,"Capelli","cerchio",9);
+  } else if (h.forma==="caschetto"){
+    var hgt = Math.max(c.R*0.22, c.top - c.R*0.3);
+    out += rect(c.cx - c.w*1.02, c.cy - c.top - c.R*0.14, c.w*2.04, hgt + c.R*0.14, col);
+    use(used,"Capelli","rettangolo");
+  }
+  return out;
+}
+function eyeGeom(s, c){
+  var o = s.occhi;
+  return {e: c.R*0.15*o.scala, dx: c.R*0.36*o.dist, y: c.cy - c.R*0.18};
+}
+function drawEyes(s, c, used){
+  var o = s.occhi, g = eyeGeom(s,c), out = "";
+  out += shape(o.forma, c.cx-g.dx, g.y, g.e, g.e, o.colore, -o.rot) + shape(o.forma, c.cx+g.dx, g.y, g.e, g.e, o.colore, o.rot);
+  use(used,"Occhi",o.forma,2);
+  if (o.pupille){
+    var pc = o.colore===INK ? "#ffffff" : INK, pr = g.e*0.42;
+    out += '<circle cx="'+f(c.cx-g.dx)+'" cy="'+f(g.y)+'" r="'+f(pr)+'" fill="'+pc+'"/>';
+    out += '<circle cx="'+f(c.cx+g.dx)+'" cy="'+f(g.y)+'" r="'+f(pr)+'" fill="'+pc+'"/>';
+    use(used,"Occhi","cerchio",2);
+  }
+  return out;
+}
+function drawNose(s, c, used){
+  var o = s.naso; if (o.forma==="nessuno") return "";
+  var e = c.R*0.12*o.scala;
+  use(used,"Naso",o.forma);
+  return shape(o.forma, c.cx, c.cy + c.R*0.12, e, e, o.colore, o.rot);
+}
+function drawMouth(s, c, used){
+  var o = s.bocca, w = c.R*0.26*o.scala, h = c.R*0.13*o.scala;
+  if (o.forma==="cerchio"){ w = h = c.R*0.12*o.scala; }
+  use(used,"Bocca",o.forma);
+  return shape(o.forma, c.cx, c.cy + c.R*0.47, w, h, o.colore, o.rot);
+}
+function drawExtra(s, c, used){
+  var o = s.extra, out = "";
+  if (o.forma==="tondi" || o.forma==="quadri"){
+    var g = eyeGeom(s,c), t = o.forma==="tondi" ? "cerchio" : "quadrato", r = g.e*1.7;
+    var a = 'fill="rgba(255,255,255,0.28)" stroke="'+o.colore+'" stroke-width="5" stroke-linejoin="round"';
+    out += '<g transform="translate('+f(c.cx-g.dx)+' '+f(g.y)+')">'+el(t,r,r,a)+'</g>';
+    out += '<g transform="translate('+f(c.cx+g.dx)+' '+f(g.y)+')">'+el(t,r,r,a)+'</g>';
+    var gap = g.dx - r; if (gap > 0) out += '<line x1="'+f(c.cx-gap)+'" y1="'+f(g.y)+'" x2="'+f(c.cx+gap)+'" y2="'+f(g.y)+'" stroke="'+o.colore+'" stroke-width="5" stroke-linecap="round"/>';
+    use(used,"Accessori",t,2);
+  } else if (o.forma==="guance"){
+    var r2 = c.R*0.1;
+    out += shape("cerchio", c.cx - c.R*0.52, c.cy + c.R*0.22, r2, r2, o.colore, 0, 2);
+    out += shape("cerchio", c.cx + c.R*0.52, c.cy + c.R*0.22, r2, r2, o.colore, 0, 2);
+    use(used,"Accessori","cerchio",2);
+  } else if (o.forma==="papillon"){
+    var y = c.cy + c.bot + c.R*0.2, d = c.R*0.36, hh = c.R*0.2;
+    out += poly([[c.cx,y],[c.cx-d,y-hh],[c.cx-d,y+hh]], o.colore);
+    out += poly([[c.cx,y],[c.cx+d,y-hh],[c.cx+d,y+hh]], o.colore);
+    out += shape("cerchio", c.cx, y, c.R*0.08, c.R*0.08, o.colore, 0);
+    use(used,"Accessori","triangolo",2); use(used,"Accessori","cerchio");
+  }
+  return out;
+}
+function drawHat(s, c, used){
+  var o = s.cappello, col = o.colore, k = o.scala, out = "";
+  var base = c.cy - c.top + c.R*0.12;
+  if (o.forma==="babbo"){
+    out += poly([[c.cx - c.w*0.95, base],[c.cx + c.w*0.95, base],[c.cx + c.R*0.4, base - c.R*1.1*k]], col);
+    out += rect(c.cx - c.w*1.06, base - c.R*0.13, c.w*2.12, c.R*0.26, "#ffffff");
+    out += shape("cerchio", c.cx + c.R*0.4, base - c.R*1.1*k, c.R*0.15, c.R*0.15, "#ffffff", 0);
+    use(used,"Cappello","triangolo"); use(used,"Cappello","rettangolo"); use(used,"Cappello","cerchio");
+  } else if (o.forma==="corona"){
+    var x0 = c.cx - c.w*0.8, W = c.w*1.6, hb = c.R*0.3, top = base - hb, st = W/3;
+    for (var i=0;i<3;i++) out += poly([[x0+i*st, top],[x0+(i+1)*st, top],[x0+(i+0.5)*st, top - c.R*0.42*k]], col);
+    out += rect(x0, top, W, hb, col);
+    use(used,"Cappello","triangolo",3); use(used,"Cappello","rettangolo");
+  } else if (o.forma==="cilindro"){
+    var th = c.R*0.95*k;
+    out += rect(c.cx - c.w*0.62, base - c.R*0.06 - th, c.w*1.24, th, col);
+    out += rect(c.cx - c.w*1.05, base - c.R*0.12, c.w*2.1, c.R*0.14, col);
+    use(used,"Cappello","rettangolo",2);
+  } else if (o.forma==="stella"){
+    var r = c.R*0.32*k;
+    out += shape("stella", c.cx, base - c.R*0.2 - r, r, r, col, 0);
+    use(used,"Cappello","stella");
+  }
+  return out;
+}
+
+function buildSVG(s, used, forExport){
+  var c = faceCtx(s.viso), b = s.sfondo, out = [];
+  var ns = forExport ? ' xmlns="http://www.w3.org/2000/svg"' : '';
+  out.push('<svg'+ns+' id="avatar" viewBox="0 0 400 440" role="img" aria-label="Avatar di '+(s.nome?esc(s.nome):'un alunno')+' fatto di figure geometriche">');
+  if (!forExport) out.push('<rect width="400" height="440" fill="'+b.colore+'"/>');
+  if (b.quadretti && !forExport){
+    var g = '';
+    for (var x=20;x<400;x+=20) g += '<line x1="'+x+'" y1="0" x2="'+x+'" y2="440"/>';
+    for (var y=20;y<440;y+=20) g += '<line x1="0" y1="'+y+'" x2="400" y2="'+y+'"/>';
+    out.push('<g stroke="#ffffff" stroke-opacity="0.55" stroke-width="1">'+g+'</g>');
+  }
+  out.push('<g id="all"><g id="content" transform="'+fitT+'">');
+  out.push(drawHairBack(s,c,used));
+  out.push(drawEars(s,c,used));
+  out.push(shape(s.viso.forma, c.cx, c.cy, c.F, c.F, s.viso.colore, s.viso.rot, 4));
+  use(used,"Viso",s.viso.forma);
+  out.push(drawHairFront(s,c,used));
+  out.push(drawEyes(s,c,used));
+  out.push(drawNose(s,c,used));
+  out.push(drawMouth(s,c,used));
+  out.push(drawExtra(s,c,used));
+  out.push(drawHat(s,c,used));
+  out.push('</g>');
+  if (s.nome){
+    out.push('<text x="200" y="'+(forExport ? f(nameY) : 424)+'" text-anchor="middle" font-family="Fredoka, Arial Rounded MT Bold, Arial, sans-serif" font-weight="700" font-size="26" fill="'+INK+'" stroke="#ffffff" stroke-width="6" paint-order="stroke">'+esc(s.nome)+'</text>');
+  }
+  out.push('</g></svg>');
+  var svg = out.join("");
+  if (forExport && cropBox){
+    svg = svg.replace('viewBox="0 0 400 440"', 'viewBox="'+cropBox.join(" ")+'" width="'+cropBox[2]+'" height="'+cropBox[3]+'"');
+  }
+  return svg;
+}
+function esc(t){ return String(t).replace(/[&<>"']/g, function(ch){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]; }); }
+
+/* ---------- Anteprime dei pulsanti ---------- */
+function thumb(partId, forma){
+  if (forma==="nessuno"){
+    return '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="30" fill="none" stroke="#cdd7ea" stroke-width="5" stroke-dasharray="8 6"/><line x1="28" y1="72" x2="72" y2="28" stroke="#cdd7ea" stroke-width="5" stroke-linecap="round"/></svg>';
+  }
+  if (["viso","orecchie","occhi","naso","bocca"].indexOf(partId) >= 0){
+    var col = partId==="orecchie" ? state.viso.colore : state[partId].colore;
+    return '<svg viewBox="0 0 100 100" aria-hidden="true">'+shape(forma,50,52,30,30,col,0)+'</svg>';
+  }
+  var s = clone(state), u = [];
+  s.viso = {forma:"cerchio", colore:"#e6ebf5", scala:1, rot:0};
+  if (partId!=="capelli") s.capelli.forma = "nessuno";
+  if (partId!=="cappello") s.cappello.forma = "nessuno";
+  if (partId!=="extra") s.extra.forma = "nessuno";
+  s[partId].forma = forma;
+  var c = faceCtx(s.viso);
+  var inner = drawHairBack(s,c,u) + shape("cerchio",c.cx,c.cy,c.R,c.R,"#e6ebf5",0) + drawHairFront(s,c,u) +
+              (partId==="extra" && (forma==="tondi"||forma==="quadri") ? drawEyes(s,c,u) : "") +
+              drawExtra(s,c,u) + drawHat(s,c,u);
+  return '<svg viewBox="40 0 320 420" aria-hidden="true">'+inner+'</svg>';
+}
+function infoFor(forma){
+  var m = META[forma]; if (!m) return "";
+  if (forma==="semicerchio") return "1 lato e 1 arco";
+  if (m[2]===0) return "nessun vertice";
+  return m[2]+" lati";
+}
+
+/* ---------- Stato ---------- */
+var fitT = "", cropBox = null, cb = null, nameY = 424;
+function measureCrop(){
+  if (!cb){ cropBox = null; nameY = 424; return; }
+  var pad = 4, x = cb.x, r = cb.r, y = cb.y, bottom = cb.b;
+  var t = document.querySelector("#avatar text");
+  nameY = Math.min(424, cb.b + 34);
+  if (t && t.getBBox){
+    var tb = t.getBBox();
+    x = Math.min(x, 200 - tb.width/2 - 4);
+    r = Math.max(r, 200 + tb.width/2 + 4);
+    bottom = nameY + 10;
+  }
+  x = Math.max(0, Math.floor(x - pad)); y = Math.max(0, Math.floor(y - pad));
+  r = Math.min(400, Math.ceil(r + pad)); bottom = Math.min(440, Math.ceil(bottom + pad));
+  cropBox = [x, y, r - x, bottom - y];
+}
+function fit(){
+  var g = document.getElementById("content");
+  if (!g || !g.getBBox) { fitT = ""; cb = null; return; }
+  g.setAttribute("transform","");
+  var b = g.getBBox(), top = 8, bottom = 398, left = 8, right = 392;
+  var k = Math.min(1, (right-left)/b.width, (bottom-top)/b.height);
+  var cx = b.x + b.width/2, nx = Math.min(Math.max(cx, left + b.width*k/2), right - b.width*k/2);
+  var ny = b.y + b.height/2;
+  var minY = top + b.height*k/2, maxY = bottom - b.height*k/2;
+  ny = Math.min(Math.max(ny, minY), maxY);
+  var dx = nx - cx*k, dy = ny - (b.y + b.height/2)*k;
+  fitT = (k===1 && Math.abs(dx)<0.5 && Math.abs(dy)<0.5) ? "" : "translate("+f(dx)+" "+f(dy)+") scale("+f(k*1000)/1000+")";
+  g.setAttribute("transform", fitT);
+  cb = {x: b.x*k + dx, y: b.y*k + dy, r: (b.x + b.width)*k + dx, b: (b.y + b.height)*k + dy};
+}
+var KEY = "avatar-geometrico-v1";
+var state = clone(DEFAULT);
+try {
+  var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+  if (saved && saved.viso) state = Object.assign(clone(DEFAULT), saved);
+} catch(e){}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+var current = "viso";
+var target = 20;
+var TARGETS = [12,16,20,24,28,32,36,40];
+function newTarget(){ var t; do { t = TARGETS[Math.floor(Math.random()*TARGETS.length)]; } while (t===target); target = t; }
+
+/* ---------- UI ---------- */
+var $ = function(id){ return document.getElementById(id); };
+
+function renderTabs(){
+  $("tabs").innerHTML = PARTS.map(function(p){
+    return '<button type="button" class="tab" role="tab" id="tab-'+p.id+'" aria-selected="'+(p.id===current)+'" data-tab="'+p.id+'">'+p.nome+'</button>';
+  }).join("");
+}
+function sliderHTML(id, label, min, max, step, val, unit){
+  return '<label class="slider" for="sl-'+id+'">'+label+': <span id="v-'+id+'">'+fmt(val,unit)+'</span>'+
+         '<input type="range" id="sl-'+id+'" data-ctrl="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'" value="'+val+'"></label>';
+}
+function fmt(v, unit){ return unit==="°" ? Math.round(v)+"°" : Math.round(v*100)+"%"; }
+
+function renderPanel(){
+  var p = PART[current], s = state[current], h = '<h2>'+p.nome+'</h2>';
+  if (p.forme){
+    h += '<div class="group"><p class="group-title">Scegli la figura</p><div class="shapes">';
+    h += p.forme.map(function(fm){
+      return '<button type="button" class="shape-btn" data-forma="'+fm+'" aria-pressed="'+(s.forma===fm)+'">'+
+             thumb(current, fm)+'<span>'+LABEL[fm]+'</span><span class="info">'+infoFor(fm)+'</span></button>';
+    }).join("");
+    h += '</div></div>';
+  }
+  if (p.colori){
+    h += '<div class="group"><p class="group-title">Scegli il colore</p><div class="swatches">';
+    h += p.colori.map(function(col){
+      return '<button type="button" class="sw" data-colore="'+col+'" style="background:'+col+'" aria-label="Colore '+col+'" aria-pressed="'+(s.colore===col)+'"></button>';
+    }).join("");
+    h += '</div></div>';
+  }
+  if (p.nota) h += '<p class="status">'+p.nota+'</p>';
+  var sl = "";
+  if (p.ctrl.indexOf("scala")>=0){ var r = p.scala || [0.6,1.4]; sl += sliderHTML("scala","Grandezza",r[0],r[1],0.05,s.scala,"%"); }
+  if (p.ctrl.indexOf("rot")>=0) sl += sliderHTML("rot","Rotazione",current==="viso"?-45:-180,current==="viso"?45:180,15,s.rot,"°");
+  if (p.ctrl.indexOf("dist")>=0) sl += sliderHTML("dist","Distanza tra gli occhi",0.7,1.3,0.05,s.dist,"%");
+  if (sl) h += '<div class="group sliders">'+sl+'</div>';
+  if (p.ctrl.indexOf("pupille")>=0) h += '<label class="check" for="ck-pupille"><input type="checkbox" id="ck-pupille" data-ctrl="pupille" '+(s.pupille?"checked":"")+'> Pupille (2 cerchi in più)</label>';
+  if (p.ctrl.indexOf("quadretti")>=0) h += '<label class="check" for="ck-quadretti"><input type="checkbox" id="ck-quadretti" data-ctrl="quadretti" '+(s.quadretti?"checked":"")+'> Sfondo a quadretti</label>';
+  if (current==="viso" || current==="occhi") h += '<p class="status">Prova la rotazione: di quanti gradi devi girare un quadrato perché sembri di nuovo uguale?</p>';
+  $("panel").innerHTML = h;
+  $("panel").setAttribute("aria-labelledby","tab-"+current);
+}
+
+function renderCount(used){
+  var order = ["Viso","Orecchie","Capelli","Occhi","Naso","Bocca","Cappello","Accessori"];
+  var groups = {}, totL = 0, totV = 0, totF = 0;
+  used.forEach(function(u){
+    var m = META[u.tipo] || META.cerchio;
+    var g = groups[u.parte] || (groups[u.parte] = {figs:{}, l:0, v:0});
+    g.figs[m[0]] = (g.figs[m[0]]||0) + 1;
+    g.l += m[2]; g.v += m[3]; totL += m[2]; totV += m[3]; totF++;
+  });
+  var rows = "";
+  order.forEach(function(k){
+    var g = groups[k]; if (!g) return;
+    var desc = Object.keys(g.figs).map(function(n){
+      var q = g.figs[n], key = Object.keys(META).filter(function(t){ return META[t][0]===n; })[0];
+      return q + " " + (q===1 ? n : META[key][1]);
+    }).join(", ");
+    rows += '<tr><td>'+k+'</td><td>'+desc+'</td><td class="n">'+g.l+'</td><td class="n">'+g.v+'</td></tr>';
+  });
+  $("rows").innerHTML = rows;
+  $("totFig").textContent = totF + (totF===1 ? " figura" : " figure");
+  $("totLati").textContent = totL;
+  $("totVert").textContent = totV;
+  $("sfidaTesto").textContent = "Sfida: crea un avatar con esattamente " + target + " vertici.";
+  var st = $("sfidaStato");
+  if (totV === target){ st.textContent = "Ce l'hai fatta!"; st.className = "badge win"; }
+  else { var d = target - totV; st.textContent = d > 0 ? "Mancano " + d + " vertici" : "Hai " + (-d) + " vertici in più"; st.className = "badge"; }
+}
+
+function render(){
+  var used = [];
+  $("stage").innerHTML = buildSVG(state, used, false);
+  fit();
+  measureCrop();
+  renderCount(used);
+  save();
+}
+function full(){ renderTabs(); renderPanel(); render(); }
+
+/* ---------- Eventi ---------- */
+$("tabs").addEventListener("click", function(e){
+  var b = e.target.closest("[data-tab]"); if (!b) return;
+  current = b.getAttribute("data-tab"); renderTabs(); renderPanel();
+  var t = $("tab-"+current); if (t) t.focus();
+});
+$("panel").addEventListener("click", function(e){
+  var b = e.target.closest("[data-forma],[data-colore]"); if (!b) return;
+  if (b.hasAttribute("data-forma")) state[current].forma = b.getAttribute("data-forma");
+  else state[current].colore = b.getAttribute("data-colore");
+  renderPanel(); render();
+  var sel = b.hasAttribute("data-forma") ? '[data-forma="'+b.getAttribute("data-forma")+'"]' : '[data-colore="'+b.getAttribute("data-colore")+'"]';
+  var nb = $("panel").querySelector(sel); if (nb) nb.focus();
+});
+$("panel").addEventListener("input", function(e){
+  var t = e.target, k = t.getAttribute("data-ctrl"); if (!k) return;
+  if (t.type==="checkbox") state[current][k] = t.checked;
+  else {
+    state[current][k] = parseFloat(t.value);
+    var v = $("v-"+k); if (v) v.textContent = fmt(state[current][k], k==="rot" ? "°" : "%");
+  }
+  render();
+});
+$("nome").value = state.nome || "";
+$("nome").addEventListener("input", function(e){ state.nome = e.target.value; render(); });
+
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+$("caso").addEventListener("click", function(){
+  PARTS.forEach(function(p){
+    var s = state[p.id];
+    if (p.forme) s.forma = pick(p.forme);
+    if (p.colori) s.colore = pick(p.colori);
+  });
+  if (state.viso.forma==="nessuno") state.viso.forma = "cerchio";
+  if (state.bocca.forma==="nessuno") state.bocca.forma = "semicerchio";
+  state.occhi.colore = pick(["#ffffff","#bfe3ff","#c9f2c0","#fff1a8"]);
+  state.occhi.pupille = true;
+  full(); status("Ecco un avatar a caso. Ora cambialo come vuoi tu.");
+});
+$("reset").addEventListener("click", function(){
+  var n = state.nome; state = clone(DEFAULT); state.nome = n; full(); status("");
+});
+$("nuovaSfida").addEventListener("click", function(){ newTarget(); render(); });
+
+function status(t){ $("status").textContent = t; }
+
+/* ---------- Immagine PNG ---------- */
+function makePNG(){
+  return new Promise(function(resolve, reject){
+    var svg = buildSVG(state, [], true);
+    var img = new Image();
+    img.onload = function(){
+      var bw = cropBox ? cropBox[2] : 400, bh = cropBox ? cropBox[3] : 440, k = 2.5;
+      var cv = document.createElement("canvas"); cv.width = Math.round(bw*k); cv.height = Math.round(bh*k);
+      var ctx = cv.getContext("2d"); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(function(b){ b ? resolve({blob:b, url:cv.toDataURL("image/png")}) : reject(new Error("png")); }, "image/png");
+    };
+    img.onerror = function(){ reject(new Error("svg")); };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  });
+}
+function showModal(url, text){
+  $("modal-img").src = url;
+  if (text) $("modal-text").innerHTML = text;
+  $("modal").classList.add("open"); $("chiudi").focus();
+}
+$("chiudi").addEventListener("click", function(){ $("modal").classList.remove("open"); });
+$("modal").addEventListener("click", function(e){ if (e.target.id==="modal") $("modal").classList.remove("open"); });
+document.addEventListener("keydown", function(e){ if (e.key==="Escape") $("modal").classList.remove("open"); });
+
+$("copia").addEventListener("click", function(){
+  var pngP = makePNG();
+  var shown = false;
+  var fallback = function(){
+    if (shown) return; shown = true;
+    pngP.then(function(r){
+      showModal(r.url, "Fai clic destro sull'immagine (o tieni premuto sul tablet) e scegli <b>Copia immagine</b>. Poi incollala dove vuoi.");
+      status("");
+    }).catch(function(){ status("Non riesco a creare l'immagine. Riprova."); });
+  };
+  try {
+    if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem){
+      var item = new ClipboardItem({"image/png": pngP.then(function(r){ return r.blob; })});
+      var timer = setTimeout(fallback, 4000);
+      navigator.clipboard.write([item]).then(function(){
+        clearTimeout(timer);
+        if (!shown) status("Avatar copiato! Incollalo dove vuoi con Ctrl+V.");
+      }, function(){ clearTimeout(timer); fallback(); });
+    } else fallback();
+  } catch(e){ fallback(); }
+});
+
+newTarget();
+full();
+})();
+</script>
+</body>
+</html>
