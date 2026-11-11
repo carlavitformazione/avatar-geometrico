@@ -144,6 +144,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--ink);border-bottom:none;font
       <button class="btn sun" id="caso" type="button">A caso</button>
       <button class="btn" id="reset" type="button">Ricomincia</button>
       <button class="btn blue wide" id="copia" type="button">Copia</button>
+      <button class="btn primary wide" id="scarica" type="button" hidden>Scarica immagine</button>
     </div>
     <p class="status" id="status" role="status"></p>
   </section>
@@ -178,7 +179,10 @@ tfoot td{font-weight:800;border-top:2px solid var(--ink);border-bottom:none;font
     <h3 id="modal-title">Il tuo avatar è pronto</h3>
     <p id="modal-text">Fai clic destro sull'immagine (o tieni premuto sul tablet) e scegli <b>Copia immagine</b>. Poi incollala dove vuoi.</p>
     <img id="modal-img" alt="Immagine del tuo avatar">
-    <button class="btn" id="chiudi" type="button">Chiudi</button>
+    <div class="btns">
+      <button class="btn primary" id="modal-scarica" type="button" hidden>Scarica immagine</button>
+      <button class="btn" id="chiudi" type="button">Chiudi</button>
+    </div>
   </div>
 </div>
 
@@ -692,24 +696,54 @@ $("chiudi").addEventListener("click", function(){ $("modal").classList.remove("o
 $("modal").addEventListener("click", function(e){ if (e.target.id==="modal") $("modal").classList.remove("open"); });
 document.addEventListener("keydown", function(e){ if (e.key==="Escape") $("modal").classList.remove("open"); });
 
+var inFrame = (function(){ try { return window.self !== window.top; } catch(e){ return true; } })();
+function fileName(){
+  var n = (state.nome || "").trim().toLowerCase().replace(/[^a-z0-9àèéìòù]+/gi,"-").replace(/^-+|-+$/g,"");
+  return "avatar" + (n ? "-" + n : "") + ".png";
+}
+function download(url){
+  var a = document.createElement("a"); a.href = url; a.download = fileName();
+  document.body.appendChild(a); a.click(); a.remove();
+  status("Immagine scaricata: " + fileName() + ". Nella slide usa Inserisci → Immagine → Carica dal computer.");
+}
+if (!inFrame){
+  $("scarica").hidden = false;
+  $("modal-scarica").hidden = false;
+}
+$("scarica").addEventListener("click", function(){
+  makePNG().then(function(r){ download(r.url); }).catch(function(){ status("Non riesco a creare l'immagine. Riprova."); });
+});
+$("modal-scarica").addEventListener("click", function(){ download($("modal-img").src); $("modal").classList.remove("open"); });
+
 $("copia").addEventListener("click", function(){
   var pngP = makePNG();
-  var shown = false;
+  var done = false;
+  var ok = function(){
+    if (done) return; done = true; clearTimeout(timer);
+    status("Avatar copiato! Incollalo dove vuoi con Ctrl+V (sul Mac Cmd+V).");
+  };
   var fallback = function(){
-    if (shown) return; shown = true;
+    if (done) return; done = true; clearTimeout(timer);
     pngP.then(function(r){
-      showModal(r.url, "Fai clic destro sull'immagine (o tieni premuto sul tablet) e scegli <b>Copia immagine</b>. Poi incollala dove vuoi.");
+      showModal(r.url, "Il browser non ha permesso la copia automatica. Fai clic destro sull'immagine (o tieni premuto sul tablet) e scegli <b>Copia immagine</b>" + (inFrame ? "." : ", oppure premi <b>Scarica immagine</b>."));
       status("");
     }).catch(function(){ status("Non riesco a creare l'immagine. Riprova."); });
   };
+  var timer = setTimeout(fallback, 5000);
+  var second = function(){
+    // secondo tentativo con l'immagine già pronta
+    pngP.then(function(r){
+      try {
+        return navigator.clipboard.write([new ClipboardItem({"image/png": r.blob})]).then(ok, fallback);
+      } catch(e){ fallback(); }
+    }, fallback);
+  };
   try {
     if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem){
-      var item = new ClipboardItem({"image/png": pngP.then(function(r){ return r.blob; })});
-      var timer = setTimeout(fallback, 4000);
-      navigator.clipboard.write([item]).then(function(){
-        clearTimeout(timer);
-        if (!shown) status("Avatar copiato! Incollalo dove vuoi con Ctrl+V.");
-      }, function(){ clearTimeout(timer); fallback(); });
+      var item;
+      try { item = new ClipboardItem({"image/png": pngP.then(function(r){ return r.blob; })}); }
+      catch(e){ second(); return; }
+      navigator.clipboard.write([item]).then(ok, second);
     } else fallback();
   } catch(e){ fallback(); }
 });
